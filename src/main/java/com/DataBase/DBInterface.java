@@ -66,13 +66,13 @@ public class DBInterface {
             }
     }
     private void showDeleteMenu() {
-//        System.out.println("Input the key of the element that you want to delete: ");
-//        try {
-//            dbControlSystem.deleteRecord(scanner.next());
-//        } catch (IOException e) {
-//            System.err.println("Oops, something is wrong: ");
-//            System.out.println(e.getMessage());
-//        }
+        System.out.println("Input the key of the element that you want to delete: ");
+        try {
+            dbControlSystem.deleteRecord(scanner.next());
+        } catch (IOException e) {
+            System.err.println("Oops, something is wrong: ");
+            System.out.println(e.getMessage());
+        }
     }
     private void showModifyMenu() { }
 }
