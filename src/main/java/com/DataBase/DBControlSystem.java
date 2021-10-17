@@ -6,11 +6,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class DBControlSystem {
     private int currentDataLine =0;
     private final String path;
-    private ArrayList<ArrayList<String>> indexArea;
+    private ArrayList<String[]> indexArea;
+    private ArrayList<String> owerflowArea = new ArrayList<>();
 
     DBControlSystem(String path) throws IOException {
         initializeIndexArea();
@@ -29,10 +31,11 @@ public class DBControlSystem {
         updateIndexArea(record);
         Path p = Paths.get(path + "\\index.txt");
         ArrayList<String> temp = new ArrayList<>();
-        for (ArrayList<String> l: indexArea) {
-            temp.addAll(l);
+        for (String[] l: indexArea) {
+            temp.addAll(Arrays.asList(l));
             temp.add(" ");
         }
+        temp.addAll(owerflowArea);
         Files.write(p, temp, StandardCharsets.UTF_8);
         currentDataLine++;
     }
@@ -58,7 +61,7 @@ public class DBControlSystem {
     private void initializeIndexArea() {
         this.indexArea = new ArrayList<>();
         for(int i=0; i<27; i++) {
-            indexArea.add(new ArrayList<>());
+            indexArea.add(new String[11]);
         }
     }
 
@@ -80,6 +83,15 @@ public class DBControlSystem {
         }
         if(stringBuilder.length()==1) stringBuilder.insert(0, 0);
         stringBuilder.append("-").append(currentDataLine+record.charAt(0));
-        indexArea.get(group).add(stringBuilder + " | " + currentDataLine);
+        int indexToAdd = findFreeSpace(indexArea.get(group));
+        if(indexToAdd==-1) owerflowArea.add(stringBuilder.toString());
+        else indexArea.get(group)[indexToAdd] = stringBuilder.toString();
+    }
+
+    private int findFreeSpace (String[] arr) {
+        for(int i=0; i<arr.length; i++) {
+            if(arr[i]==null) return i;
+        }
+        return -1;
     }
 }
