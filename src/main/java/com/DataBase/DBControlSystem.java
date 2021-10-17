@@ -15,7 +15,7 @@ public class DBControlSystem {
     DBControlSystem(String path) throws IOException {
         initializeIndexArea();
         this.path = path;
-        establishConnction(path);
+        establishConnection(path);
     }
 
 
@@ -31,14 +31,17 @@ public class DBControlSystem {
         ArrayList<String> temp = new ArrayList<>();
         for (ArrayList<String> l: indexArea) {
             temp.addAll(l);
+            temp.add(" ");
         }
         Files.write(p, temp, StandardCharsets.UTF_8);
         currentDataLine++;
     }
-    boolean deleteRecord(String record) { return false;}
+    void deleteRecord(String record) {
+
+    }
     boolean editRecord(String record) { return false;}
 
-    private void establishConnction(String path) throws IOException {
+    private void establishConnection(String path) throws IOException {
         File indexes = new File(path + "\\index.txt");
         File data = new File(path + "\\data.txt");
         if(createFiles(indexes, data)) {
@@ -57,7 +60,6 @@ public class DBControlSystem {
         for(int i=0; i<27; i++) {
             indexArea.add(new ArrayList<>());
         }
-
     }
 
     private void updateIndexArea (String record) {
@@ -65,11 +67,11 @@ public class DBControlSystem {
         int l1 = record.charAt(0);
         int group;
         if(l1>96) {
-            group = l1-96;
+            group = l1-97;
             stringBuilder.append(group);
         }
         else if(l1>64) {
-            group = l1-64;
+            group = l1-65;
             stringBuilder.append(group);
         }
         else {
