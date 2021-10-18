@@ -95,6 +95,7 @@ public class DBInterface {
             System.out.println(dbControlSystem.findRecord(input));
             System.out.println("Enter the new value:");
             dbControlSystem.editRecord(input, scanner.next());
+            System.out.println("Edit successful");
         } catch (IOException e) {
             System.err.println("Oops, something is wrong: ");
             System.out.println(e.getMessage());

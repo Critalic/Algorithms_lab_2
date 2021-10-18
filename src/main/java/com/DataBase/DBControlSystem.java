@@ -41,20 +41,33 @@ public class DBControlSystem {
         if (group == 27) {
             int i = Math.floorDiv(overflowArea.size(), 2);
             recordNumber = binarySearch(overflowArea, i, i, id);
-            updateDataArea(overflowArea.get(recordNumber).split(" ")[2]);
+            updateDataArea(overflowArea.get(recordNumber).split(" ")[2], "<deleted>");
             overflowArea.remove(recordNumber);
         } else {
             List<String> bucket = Arrays.asList(indexArea.get(group));
             int i = Math.floorDiv(bucket.size(), 2);
             recordNumber = binarySearch(bucket, i, i, id);
-            updateDataArea(bucket.get(recordNumber).split(" ")[2]);
+            updateDataArea(bucket.get(recordNumber).split(" ")[2], "<deleted>");
             indexArea.get(group)[recordNumber] = null;
         }
         updateIndexArea();
     }
 
-    void editRecord(String recordID, String update) {
-
+    void editRecord(String recordID, String update) throws IOException {
+        String[] credentials = recordID.split("-");
+        int group = Integer.parseInt(credentials[0]);
+        int id = Integer.parseInt(credentials[1]);
+        int recordNumber;
+        if (group == 27) {
+            int i = Math.floorDiv(overflowArea.size(), 2);
+            recordNumber = binarySearch(overflowArea, i, i, id);
+            updateDataArea(overflowArea.get(recordNumber).split(" ")[2], update);
+        } else {
+            List<String> bucket = Arrays.asList(indexArea.get(group));
+            int i = Math.floorDiv(bucket.size(), 2);
+            recordNumber = binarySearch(bucket, i, i, id);
+            updateDataArea(bucket.get(recordNumber).split(" ")[2], update);
+        }
     }
 
     String findRecord (String recordID) throws IOException {
@@ -82,10 +95,10 @@ public class DBControlSystem {
         return dataArea.get(Integer.parseInt(s)).split("[ ]")[2];
     }
 
-    private void updateDataArea(String recordNumber) throws IOException {
+    private void updateDataArea(String recordNumber, String newValue) throws IOException {
         Path p = Paths.get(path + "\\data.txt");
         dataArea = Files.readAllLines(p, StandardCharsets.UTF_8);
-        dataArea.set(Integer.parseInt(recordNumber), recordNumber + " | " + "<deleted>");
+        dataArea.set(Integer.parseInt(recordNumber), recordNumber + " | " + newValue);
         Files.write(p, dataArea, StandardCharsets.UTF_8);
         dataArea=null;
     }
