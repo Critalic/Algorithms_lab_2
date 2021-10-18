@@ -14,6 +14,7 @@ public class DBControlSystem {
     private final String path;
     private ArrayList<String[]> indexArea;
     private final ArrayList<String> overflowArea = new ArrayList<>();
+    private List<String> dataArea;
 
     DBControlSystem(String path) throws IOException {
         initializeIndexArea();
@@ -21,7 +22,7 @@ public class DBControlSystem {
         establishConnection(path);
     }
 
-    void addNewrecord(String record) throws IOException {
+    void addNewRecord(String record) throws IOException {
         try (FileWriter fw = new FileWriter(path + "\\data.txt", true);
              BufferedWriter bw = new BufferedWriter(fw);
              PrintWriter printWriter = new PrintWriter(bw)) {
@@ -32,22 +33,62 @@ public class DBControlSystem {
         currentDataLine++;
     }
 
-    void deleteRecord(String record) throws IOException {
-        String[] cridentials = record.split("-");
-        int group = Integer.parseInt(cridentials[0]);
-        int id = Integer.parseInt(cridentials[1]);
-        if(group==27) {
+    void deleteRecord(String recordID) throws IOException, ArrayIndexOutOfBoundsException {
+        String[] credentials = recordID.split("-");
+        int group = Integer.parseInt(credentials[0]);
+        int id = Integer.parseInt(credentials[1]);
+        int recordNumber;
+        if (group == 27) {
             int i = Math.floorDiv(overflowArea.size(), 2);
-            overflowArea.remove(binarysearch(overflowArea, i, i, id));
+            recordNumber = binarySearch(overflowArea, i, i, id);
+            updateDataArea(overflowArea.get(recordNumber).split(" ")[2]);
+            overflowArea.remove(recordNumber);
         } else {
-            List<String> bucket= Arrays.asList(indexArea.get(group));
+            List<String> bucket = Arrays.asList(indexArea.get(group));
             int i = Math.floorDiv(bucket.size(), 2);
-            indexArea.get(group)[binarysearch(bucket, i, i, id)] = null;
+            recordNumber = binarySearch(bucket, i, i, id);
+            updateDataArea(bucket.get(recordNumber).split(" ")[2]);
+            indexArea.get(group)[recordNumber] = null;
         }
         updateIndexArea();
     }
 
-    boolean editRecord(String record) { return false;}
+    void editRecord(String recordID, String update) {
+
+    }
+
+    String findRecord (String recordID) throws IOException {
+        StringBuilder answer = new StringBuilder(recordID + " | ");
+        String[] credentials = recordID.split("-");
+        int group = Integer.parseInt(credentials[0]);
+        int id = Integer.parseInt(credentials[1]);
+        int recordNumber;
+        if (group == 27) {
+            int i = Math.floorDiv(overflowArea.size(), 2);
+            recordNumber = binarySearch(overflowArea, i, i, id);
+            answer.append(getRecord(overflowArea.get(recordNumber).split("[ ]")[2]));
+        } else {
+            List<String> bucket = Arrays.asList(indexArea.get(group));
+            int i = Math.floorDiv(bucket.size(), 2);
+            recordNumber = binarySearch(bucket, i, i, id);
+            answer.append(getRecord(bucket.get(recordNumber).split("[ ]")[2]));
+        }
+        return answer.toString();
+    }
+
+    private String getRecord(String s) throws IOException {
+        Path p = Paths.get(path + "\\data.txt");
+        dataArea = Files.readAllLines(p, StandardCharsets.UTF_8);
+        return dataArea.get(Integer.parseInt(s)).split("[ ]")[2];
+    }
+
+    private void updateDataArea(String recordNumber) throws IOException {
+        Path p = Paths.get(path + "\\data.txt");
+        dataArea = Files.readAllLines(p, StandardCharsets.UTF_8);
+        dataArea.set(Integer.parseInt(recordNumber), recordNumber + " | " + "<deleted>");
+        Files.write(p, dataArea, StandardCharsets.UTF_8);
+        dataArea=null;
+    }
 
     private void establishConnection(String path) throws IOException {
         File indexes = new File(path + "\\index.txt");
@@ -108,19 +149,19 @@ public class DBControlSystem {
         else indexArea.get(group)[indexToAdd] = stringBuilder.toString();
     }
 
-    public int binarysearch(List<String> arrayList, int current, int change, int id) {
+    public int binarySearch(List<String> arrayList, int current, int change, int id) {
         int curr = parseIndex(arrayList.get(current));
         if(curr==id) return current;
         if(curr<id) {
-            return binarysearch(arrayList, current + (Math.floorDiv(change, 2)+1), Math.floorDiv(change, 2),id);
+            return binarySearch(arrayList, current + (Math.floorDiv(change, 2)+1), Math.floorDiv(change, 2),id);
         }
         else {
-            return binarysearch(arrayList, current - (Math.floorDiv(change, 2)+1), Math.floorDiv(change,2), id);
+            return binarySearch(arrayList, current - (Math.floorDiv(change, 2)+1), Math.floorDiv(change,2), id);
         }
     }
     private int parseIndex (String index) {
         if (index ==null) return 999999;
-        String id = index.split(" | ")[0];
+        String id = index.split("[ ]")[0];
         return Integer.parseInt(id.split("-")[1]);
     }
 

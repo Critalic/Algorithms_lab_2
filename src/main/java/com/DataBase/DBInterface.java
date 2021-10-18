@@ -35,6 +35,9 @@ public class DBInterface {
                 case "3":
                     showModifyMenu();
                     break;
+                case "4":
+                    showSearchMenu();
+                    break;
                 case "q":
                     break;
                 default:
@@ -53,26 +56,71 @@ public class DBInterface {
         System.out.println("1 for adding");
         System.out.println("2 for deleting");
         System.out.println("3 for modifying");
+        System.out.println("4 for searching");
         System.out.println("q to quit");
     }
 
     private void showAddMenu() {
             System.out.println("Input what you want to add: ");
             try {
-                dbControlSystem.addNewrecord(scanner.next());
+                dbControlSystem.addNewRecord(scanner.next());
             } catch (IOException e) {
                 System.err.println("Oops, something is wrong: ");
                 System.out.println(e.getMessage());
             }
     }
     private void showDeleteMenu() {
-        System.out.println("Input the key of the element that you want to delete: ");
+        System.out.println("Input the key of the element that you want to delete (q to exit): ");
         try {
-            dbControlSystem.deleteRecord(scanner.next());
+            String input= scanner.next();
+            if(input.equals("q")) return;
+            dbControlSystem.deleteRecord(input);
+            System.out.println("Delete successful");
         } catch (IOException e) {
             System.err.println("Oops, something is wrong: ");
             System.out.println(e.getMessage());
+        } catch (StackOverflowError er) {
+            System.err.println("There is no record containing the entered key");
+            showDeleteMenu();
+        } catch (IndexOutOfBoundsException e) {
+            System.err.println("Invalid key or no record with such key");
+            showDeleteMenu();
         }
     }
-    private void showModifyMenu() { }
+    private void showModifyMenu() {
+        System.out.println("Input the key of the element that you want to edit (q to exit): ");
+        try {
+            String input= scanner.next();
+            if(input.equals("q")) return;
+            System.out.println(dbControlSystem.findRecord(input));
+            System.out.println("Enter the new value:");
+            dbControlSystem.editRecord(input, scanner.next());
+        } catch (IOException e) {
+            System.err.println("Oops, something is wrong: ");
+            System.out.println(e.getMessage());
+        } catch (StackOverflowError er) {
+            System.err.println("There is no record containing the entered key");
+            showDeleteMenu();
+        } catch (IndexOutOfBoundsException e) {
+            System.err.println("Invalid key or no record with such key");
+            showDeleteMenu();
+        }
+    }
+    private void showSearchMenu() {
+        System.out.println("Input the key of the element that you want to delete (q to exit): ");
+        try {
+            String input= scanner.next();
+            if(input.equals("q")) return;
+            System.out.println(dbControlSystem.findRecord(input));
+        } catch (IOException e) {
+            System.err.println("Oops, something is wrong: ");
+            System.out.println(e.getMessage());
+        } catch (StackOverflowError er) {
+            System.err.println("There is no record containing the entered key");
+            showDeleteMenu();
+        } catch (IndexOutOfBoundsException e) {
+            System.err.println("Invalid key or no record with such key");
+            showDeleteMenu();
+        }
+    }
 }
