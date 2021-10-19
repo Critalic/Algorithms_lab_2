@@ -19,7 +19,7 @@ public class DBControlSystem {
     DBControlSystem(String path) throws IOException {
         initializeIndexArea();
         this.path = path;
-        establishConnection(path);
+        initializeFiles(path);
     }
 
     void addNewRecord(String record) throws IOException {
@@ -48,6 +48,7 @@ public class DBControlSystem {
             int i = Math.floorDiv(bucket.size(), 2);
             recordNumber = binarySearch(bucket, i, i, id);
             updateDataArea(bucket.get(recordNumber).split(" ")[2], "<deleted>");
+            indexArea.get(group)[recordNumber] = null;
             indexArea.get(group)[recordNumber] = null;
         }
         updateIndexArea();
@@ -103,13 +104,14 @@ public class DBControlSystem {
         dataArea=null;
     }
 
-    private void establishConnection(String path) throws IOException {
+    private void initializeFiles(String path) throws IOException {
         File indexes = new File(path + "\\index.txt");
         File data = new File(path + "\\data.txt");
-        if(createFiles(indexes, data)) {
-            if(!(indexes.delete() && data.delete())) throw new IOException("Failed to establish the connection");
-            if(createFiles(indexes, data)) throw new IOException("Failed to establish the connection");
-        }
+        createFiles(indexes, data);
+//        if(createFiles(indexes, data)) {
+//            if(!(indexes.delete() && data.delete())) throw new IOException("Failed to establish the connection");
+//            if(createFiles(indexes, data)) throw new IOException("Failed to establish the connection");
+//        }
 
     }
 
@@ -162,7 +164,7 @@ public class DBControlSystem {
         else indexArea.get(group)[indexToAdd] = stringBuilder.toString();
     }
 
-    public int binarySearch(List<String> arrayList, int current, int change, int id) {
+    private int binarySearch(List<String> arrayList, int current, int change, int id) {
         int curr = parseIndex(arrayList.get(current));
         if(curr==id) return current;
         if(curr<id) {
